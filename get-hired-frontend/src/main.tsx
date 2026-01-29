@@ -7,6 +7,7 @@ import { ThemeProvider } from "./components/ui/common/ThemeProvider";
 import { AppliedJobsProvider } from "@/context/AppliedJobsContext"; 
 import { JobsProvider } from "./context/JobsContext";
 import { AuthProvider } from "./context/AuthContext";
+import { UsersProvider } from "./context/UsersContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <ThemeProvider>
           <AppliedJobsProvider>
             <JobsProvider>
-              <App />
+              <UsersProvider>
+                <App />
+              </UsersProvider>
             </JobsProvider>
           </AppliedJobsProvider>
         </ThemeProvider>

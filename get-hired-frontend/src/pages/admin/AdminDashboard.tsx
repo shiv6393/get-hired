@@ -1,6 +1,8 @@
 import { useJobs } from "@/context/JobsContext";
 import { useAppliedJobs } from "@/context/AppliedJobsContext";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+
 
 export default function AdminDashboard() {
   const { jobs } = useJobs();
@@ -9,6 +11,9 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-6xl mx-auto px-4 space-y-6">
       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <Link to="/admin/users" className="text-sm font-medium text-blue-600">
+        Manage Users →
+      </Link>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
