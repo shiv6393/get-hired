@@ -10,6 +10,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import AdminAnalytics from "./AdminAnalytics";
+
 
 export default function AdminDashboard() {
   const { jobs, deleteJob } = useJobs();
@@ -43,6 +45,8 @@ export default function AdminDashboard() {
           <p className="text-2xl font-semibold">1</p>
         </div>
       </div>
+      {/* ================= ANALYTICS ================= */}
+      <AdminAnalytics />
 
       {/* ================= JOBS TABLE ================= */}
       <div className="space-y-2">
