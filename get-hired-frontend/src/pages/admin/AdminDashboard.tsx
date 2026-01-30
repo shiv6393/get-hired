@@ -11,6 +11,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import AdminAnalytics from "./AdminAnalytics";
+import { toast } from "sonner";
+
+
 
 
 export default function AdminDashboard() {
@@ -106,6 +109,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 if (jobIdToDelete) {
                   deleteJob(jobIdToDelete);
+                  toast.success("Job deleted successfully");
                 }
                 setOpen(false);
                 setJobIdToDelete(null);
