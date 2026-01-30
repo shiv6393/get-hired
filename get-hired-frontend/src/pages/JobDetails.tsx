@@ -1,20 +1,26 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ApplyJobModal from "@/components/ui/jobs/ApplyJobModal";
-import type{ JobDetails } from "@/types/job";
+import { useJobs } from "@/context/JobsContext";
+import { Button } from "@/components/ui/button";
 
 export default function JobDetails() {
   const { id } = useParams();
+  const { jobs } = useJobs();
 
-  const job: JobDetails = {
-    id: id || "1",
-    title: "Frontend Developer",
-    company: "Google",
-    location: "Bangalore",
-    type: "Full-time",
-    description:
-      "We are looking for a frontend developer with strong React skills.",
-  };
+  const job = jobs.find((j) => j.id === id);
+
+  // ❌ Job not found
+  if (!job) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-10 space-y-4">
+        <h1 className="text-xl font-semibold">Job not found</h1>
+        <Link to="/jobs">
+          <Button variant="outline">Back to Jobs</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 space-y-6">
@@ -28,10 +34,14 @@ export default function JobDetails() {
 
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Job Description</h2>
-        <p className="text-sm">{job.description}</p>
+        <p className="text-sm">
+          {/* temporary description */}
+          We are looking for a skilled professional to join {job.company}. You
+          will work on modern technologies and scalable systems.
+        </p>
       </div>
 
-      {/* ✅ Pass correct type */}
+      {/* ✅ Pass real job from context */}
       <ApplyJobModal job={job} />
     </div>
   );
