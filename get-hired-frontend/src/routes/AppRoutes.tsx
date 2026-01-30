@@ -9,6 +9,8 @@ import PostJob from "@/pages/PostJob";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
+import UserDashboard from "@/pages/user/UserDashboard";
+
 
 
 
@@ -45,6 +47,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["ADMIN"]}>
             <AdminUsers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user"
+        element={
+          <ProtectedRoute allowedRoles={["USER"]}>
+            <UserDashboard />
           </ProtectedRoute>
         }
       />

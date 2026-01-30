@@ -41,9 +41,9 @@ export default function Navbar() {
           <Link
             to="/jobs"
             className="text-sm font-medium
-                       text-gray-600 hover:text-gray-900
-                       dark:text-gray-300 dark:hover:text-white
-                       transition-colors"
+               text-gray-600 hover:text-gray-900
+               dark:text-gray-300 dark:hover:text-white
+               transition-colors"
           >
             Jobs
           </Link>
@@ -53,11 +53,24 @@ export default function Navbar() {
             <Link
               to="/applied"
               className="text-sm font-medium
-                         text-gray-600 hover:text-gray-900
-                         dark:text-gray-300 dark:hover:text-white
-                         transition-colors"
+                 text-gray-600 hover:text-gray-900
+                 dark:text-gray-300 dark:hover:text-white
+                 transition-colors"
             >
               Applied Jobs
+            </Link>
+          )}
+
+          {/* User Dashboard */}
+          {role === "USER" && (
+            <Link
+              to="/user"
+              className="text-sm font-medium
+                 text-gray-600 hover:text-gray-900
+                 dark:text-gray-300 dark:hover:text-white
+                 transition-colors"
+            >
+              Dashboard
             </Link>
           )}
 
@@ -66,9 +79,9 @@ export default function Navbar() {
             <Link
               to="/recruiter/post-job"
               className="text-sm font-medium
-                         text-gray-600 hover:text-gray-900
-                         dark:text-gray-300 dark:hover:text-white
-                         transition-colors"
+                 text-gray-600 hover:text-gray-900
+                 dark:text-gray-300 dark:hover:text-white
+                 transition-colors"
             >
               Post Job
             </Link>
@@ -79,52 +92,6 @@ export default function Navbar() {
             <Link to="/admin" className="text-sm font-medium text-red-600">
               Admin
             </Link>
-          )}
-
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="rounded-full"
-          >
-            <AnimatePresence mode="wait">
-              {theme === "light" ? (
-                <motion.span
-                  key="moon"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                >
-                  <Moon size={18} />
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="sun"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                >
-                  <Sun size={18} />
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Button>
-
-          {/* Auth Buttons */}
-          {role ? (
-            <Button variant="outline" onClick={logout}>
-              Logout ({role})
-            </Button>
-          ) : (
-            <>
-              <Link to="/login">
-                <Button variant="outline">Login</Button>
-              </Link>
-              <Link to="/register">
-                <Button>Register</Button>
-              </Link>
-            </>
           )}
         </div>
 
@@ -171,6 +138,11 @@ export default function Navbar() {
                            text-gray-700 dark:text-gray-300"
               >
                 Applied Jobs
+              </Link>
+            )}
+            {role === "USER" && (
+              <Link to="/user" className="text-sm font-medium">
+                Dashboard
               </Link>
             )}
 
