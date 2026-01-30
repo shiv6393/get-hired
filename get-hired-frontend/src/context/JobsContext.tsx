@@ -1,54 +1,46 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type{ Job } from "@/types/job";
+import { jobsApi } from "@/services/jobsApi";
 
 interface JobsContextType {
   jobs: Job[];
-  addJob: (job: Job) => void;
-  deleteJob: (id: string) => void;
+  loading: boolean;
+  fetchJobs: () => void;
+  addJob: (job: Job) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
 }
 
 const JobsContext = createContext<JobsContextType | null>(null);
 
-const STORAGE_KEY = "jobs_data";
-
-const defaultJobs: Job[] = [
-  {
-    id: "1",
-    title: "Frontend Developer",
-    company: "Google",
-    location: "Bangalore",
-    type: "Full-time",
-  },
-];
-
 export function JobsProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 Load jobs from localStorage
-  useEffect(() => {
-    const storedJobs = localStorage.getItem(STORAGE_KEY);
-    if (storedJobs) {
-      setJobs(JSON.parse(storedJobs));
-    } else {
-      setJobs(defaultJobs);
-    }
-  }, []);
-
-  // 🔹 Persist jobs to localStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  }, [jobs]);
-
-  const addJob = (job: Job) => {
-    setJobs((prev) => [job, ...prev]);
+  const fetchJobs = async () => {
+    setLoading(true);
+    const data = await jobsApi.getAll();
+    setJobs(data);
+    setLoading(false);
   };
 
-  const deleteJob = (id: string) => {
-    setJobs((prev) => prev.filter((job) => job.id !== id));
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const addJob = async (job: Job) => {
+    const saved = await jobsApi.create(job);
+    setJobs((prev) => [saved, ...prev]);
+  };
+
+  const deleteJob = async (id: string) => {
+    await jobsApi.delete(id);
+    setJobs((prev) => prev.filter((j) => j.id !== id));
   };
 
   return (
-    <JobsContext.Provider value={{ jobs, addJob, deleteJob }}>
+    <JobsContext.Provider
+      value={{ jobs, loading, fetchJobs, addJob, deleteJob }}
+    >
       {children}
     </JobsContext.Provider>
   );
