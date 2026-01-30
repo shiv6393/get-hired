@@ -4,6 +4,7 @@ import type{ Job } from "@/types/job";
 interface JobsContextType {
   jobs: Job[];
   addJob: (job: Job) => void;
+  deleteJob: (id: string) => void;
 }
 
 const JobsContext = createContext<JobsContextType | null>(null);
@@ -23,8 +24,12 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
     setJobs((prev) => [job, ...prev]);
   };
 
+  const deleteJob = (id: string) => {
+    setJobs((prev) => prev.filter((job) => job.id !== id));
+  };
+
   return (
-    <JobsContext.Provider value={{ jobs, addJob }}>
+    <JobsContext.Provider value={{ jobs, addJob, deleteJob }}>
       {children}
     </JobsContext.Provider>
   );

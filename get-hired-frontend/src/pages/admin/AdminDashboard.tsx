@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 
 
 export default function AdminDashboard() {
-  const { jobs } = useJobs();
+  const { jobs, deleteJob } = useJobs();
+
   const { appliedJobs } = useAppliedJobs();
 
   return (
@@ -47,7 +48,11 @@ export default function AdminDashboard() {
                 </p>
               </div>
 
-              <Button variant="destructive" size="sm">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => deleteJob(job.id)}
+              >
                 Delete
               </Button>
             </div>
