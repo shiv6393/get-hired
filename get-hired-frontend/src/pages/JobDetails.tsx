@@ -3,12 +3,12 @@ import { Badge } from "@/components/ui/badge";
 import ApplyJobModal from "@/components/ui/jobs/ApplyJobModal";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import type{ JobDetails } from "@/types/job";
+import type{ Job } from "@/types/job";
 import { jobsApi } from "@/services/jobsApi";
 
 export default function JobDetails() {
   const { id } = useParams<{ id: string }>();
-  const [job, setJob] = useState<JobDetails | null>(null);
+  const [job, setJob] = useState<Job| null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -3,9 +3,7 @@ export interface Job {
   title: string;
   company: string;
   location: string;
+  description: string;
   type: "Full-time" | "Part-time" | "Internship";
 }
 
-export interface JobDetails extends Job {
-  description: string;
-}

@@ -1,64 +1,64 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
 import { useState } from "react";
-import { useAppliedJobs } from "@/context/AppliedJobsContext";
+import { jobsApi } from "@/services/jobsApi";
+import { toast } from "sonner";
 import type{ Job } from "@/types/job";
 
-
-interface ApplyJobModalProps {
+interface Props {
   job: Job;
 }
 
-export default function ApplyJobModal({ job }: ApplyJobModalProps) {
-  const { applyToJob, isApplied } = useAppliedJobs();
-  const [coverLetter, setCoverLetter] = useState("");
+export default function ApplyJobModal({ job }: Props) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const applied = isApplied(job.id);
-
-  const handleApply = () => {
-    applyToJob(job);
+  const handleApply = async () => {
+    try {
+      setLoading(true);
+      await jobsApi.applyJob(job.id);
+      toast.success("Applied successfully");
+      setOpen(false);
+    } catch {
+      // error toast handled globally by axios interceptor
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button disabled={applied}>{applied ? "Applied" : "Apply Now"}</Button>
-      </DialogTrigger>
+    <>
+      <Button onClick={() => setOpen(true)}>Apply Now</Button>
 
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Apply for {job.title}</DialogTitle>
-        </DialogHeader>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apply for {job.title}</DialogTitle>
 
-        {!applied ? (
-          <div className="space-y-4">
-            <Textarea
-              placeholder="Write a short cover letter..."
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-            />
+            <DialogDescription>
+              You are about to apply for this job at {job.company}. Please
+              confirm to continue.
+            </DialogDescription>
+          </DialogHeader>
 
-            <Button
-              onClick={handleApply}
-              disabled={!coverLetter.trim()}
-              className="w-full"
-            >
-              Submit Application
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+
+            <Button onClick={handleApply} disabled={loading}>
+              {loading ? "Applying..." : "Confirm Apply"}
             </Button>
           </div>
-        ) : (
-          <p className="text-green-600 text-sm">
-            ✅ Application submitted successfully
-          </p>
-        )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
