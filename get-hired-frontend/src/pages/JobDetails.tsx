@@ -1,46 +1,47 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ApplyJobModal from "@/components/ui/jobs/ApplyJobModal";
-import { Button } from "@/components/ui/button";
+import type { Job as JobDetailsType } from "@/types/job";
 import { useEffect, useState } from "react";
-import type{ Job } from "@/types/job";
 import { jobsApi } from "@/services/jobsApi";
 
 export default function JobDetails() {
   const { id } = useParams<{ id: string }>();
-  const [job, setJob] = useState<Job| null>(null);
+
+  const [job, setJob] = useState<JobDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchJob = async () => {
+    const loadJob = async () => {
       try {
+        setLoading(true);
         const data = await jobsApi.getById(id);
         setJob(data);
+      } catch (err) {
+        setError("Unable to load job details");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchJob();
+    loadJob();
   }, [id]);
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="max-w-4xl mx-auto px-4">
         <p className="text-sm text-muted-foreground">Loading job details...</p>
       </div>
     );
   }
 
-  if (!job) {
+  if (error || !job) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-4">
-        <h1 className="text-xl font-semibold">Job not found</h1>
-        <Link to="/jobs">
-          <Button variant="outline">Back to Jobs</Button>
-        </Link>
+      <div className="max-w-4xl mx-auto px-4">
+        <p className="text-sm text-red-500">{error}</p>
       </div>
     );
   }
@@ -60,7 +61,6 @@ export default function JobDetails() {
         <p className="text-sm">{job.description}</p>
       </div>
 
-      {/* Apply modal still works */}
       <ApplyJobModal job={job} />
     </div>
   );
