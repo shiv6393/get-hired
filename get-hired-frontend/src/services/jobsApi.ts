@@ -23,7 +23,10 @@ export const jobsApi = {
     return res.data;
   },
 
-//   applyJob: async (id: string): Promise<void> => {
-//     await api.post(`/jobs/${id}/apply`);
-//   },
- };
+  //   applyJob: async (id: string): Promise<void> => {
+  //     await api.post(`/jobs/${id}/apply`);
+  //   },
+  delete: async (id: string) => {
+    await api.delete(`/jobs/${id}`);
+  },
+};

@@ -12,21 +12,22 @@ interface JobsContextType {
     sortBy?: string,
     dir?: "asc" | "desc",
   ) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
 }
 
 const JobsContext = createContext<JobsContextType | null>(null);
 
 export function JobsProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   const fetchJobs = async (
     page = 0,
     sortBy = "createdAt",
     dir: "asc" | "desc" = "desc",
-  ) => {
+  ): Promise<void> => {
     setLoading(true);
     try {
       const res = await jobsApi.getAll(page, sortBy, dir);
@@ -42,6 +43,11 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
     fetchJobs();
   }, []);
 
+  const deleteJob = async (id: string): Promise<void> => {
+    await jobsApi.delete(id);
+    setJobs((prev) => prev.filter((job) => job.id !== id));
+  };
+
   return (
     <JobsContext.Provider
       value={{
@@ -50,6 +56,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
         page,
         totalPages,
         fetchJobs,
+        deleteJob,
       }}
     >
       {children}
@@ -57,7 +64,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useJobs = () => {
+export const useJobs = (): JobsContextType => {
   const ctx = useContext(JobsContext);
   if (!ctx) {
     throw new Error("useJobs must be used inside JobsProvider");

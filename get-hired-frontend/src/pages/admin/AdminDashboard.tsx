@@ -68,10 +68,7 @@ export default function AdminDashboard() {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => {
-                  setJobIdToDelete(job.id);
-                  setOpen(true);
-                }}
+                onClick={() => deleteJob(job.id)}
               >
                 Delete
               </Button>
