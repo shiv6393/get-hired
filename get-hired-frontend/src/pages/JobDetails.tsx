@@ -1,16 +1,39 @@
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ApplyJobModal from "@/components/ui/jobs/ApplyJobModal";
-import { useJobs } from "@/context/JobsContext";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import type{ JobDetails } from "@/types/job";
+import { jobsApi } from "@/services/jobsApi";
 
 export default function JobDetails() {
-  const { id } = useParams();
-  const { jobs } = useJobs();
+  const { id } = useParams<{ id: string }>();
+  const [job, setJob] = useState<JobDetails | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const job = jobs.find((j) => j.id === id);
+  useEffect(() => {
+    if (!id) return;
 
-  // ❌ Job not found
+    const fetchJob = async () => {
+      try {
+        const data = await jobsApi.getById(id);
+        setJob(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-10">
+        <p className="text-sm text-muted-foreground">Loading job details...</p>
+      </div>
+    );
+  }
+
   if (!job) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-10 space-y-4">
@@ -34,14 +57,10 @@ export default function JobDetails() {
 
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Job Description</h2>
-        <p className="text-sm">
-          {/* temporary description */}
-          We are looking for a skilled professional to join {job.company}. You
-          will work on modern technologies and scalable systems.
-        </p>
+        <p className="text-sm">{job.description}</p>
       </div>
 
-      {/* ✅ Pass real job from context */}
+      {/* Apply modal still works */}
       <ApplyJobModal job={job} />
     </div>
   );
