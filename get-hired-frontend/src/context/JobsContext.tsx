@@ -1,14 +1,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type{ Job } from "@/types/job";
 import { jobsApi } from "@/services/jobsApi";
-import { toast } from "sonner";
 
 interface JobsContextType {
   jobs: Job[];
   loading: boolean;
-  fetchJobs: () => void;
-  addJob: (job: Job) => Promise<void>;
-  deleteJob: (id: string) => Promise<void>;
+  fetchJobs: () => Promise<void>;
 }
 
 const JobsContext = createContext<JobsContextType | null>(null);
@@ -28,21 +25,8 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
     fetchJobs();
   }, []);
 
-  const addJob = async (job: Job) => {
-    const saved = await jobsApi.create(job);
-    setJobs((prev) => [saved, ...prev]);
-    toast.success("Job posted successfully");
-  };
-const deleteJob = async (id: string) => {
-  await jobsApi.delete(id);
-  setJobs((prev) => prev.filter((j) => j.id !== id));
-  toast.success("Job deleted");
-};
-
   return (
-    <JobsContext.Provider
-      value={{ jobs, loading, fetchJobs, addJob, deleteJob }}
-    >
+    <JobsContext.Provider value={{ jobs, loading, fetchJobs }}>
       {children}
     </JobsContext.Provider>
   );
