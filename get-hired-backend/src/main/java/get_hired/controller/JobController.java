@@ -19,7 +19,7 @@ import java.util.Map;
 public class JobController {
 
     private final JobService jobService;
-    private final JobRepository jobRepository;
+    private final JobRepository jobRepository; 
 
     @GetMapping
     public Page<Job> getJobs(
