@@ -1,8 +1,12 @@
 package get_hired.controller;
 
 import get_hired.entity.Job;
+import get_hired.repository.JobRepository;
 import get_hired.service.JobService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,10 +19,21 @@ import java.util.Map;
 public class JobController {
 
     private final JobService jobService;
+    private final JobRepository jobRepository;
 
     @GetMapping
-    public List<Job> getAllJobs() {
-        return jobService.getAllJobs();
+    public Page<Job> getJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort sort = direction.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        PageRequest pageable = PageRequest.of(page, size, sort);
+        return jobRepository.findAll(pageable);
     }
 
     @GetMapping("/{id}")

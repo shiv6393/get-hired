@@ -1,11 +1,17 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type{ Job } from "@/types/job";
+import type { Job } from "@/types/job";
 import { jobsApi } from "@/services/jobsApi";
 
 interface JobsContextType {
   jobs: Job[];
   loading: boolean;
-  fetchJobs: () => Promise<void>;
+  page: number;
+  totalPages: number;
+  fetchJobs: (
+    page?: number,
+    sortBy?: string,
+    dir?: "asc" | "desc",
+  ) => Promise<void>;
 }
 
 const JobsContext = createContext<JobsContextType | null>(null);
@@ -13,12 +19,23 @@ const JobsContext = createContext<JobsContextType | null>(null);
 export function JobsProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const fetchJobs = async () => {
+  const fetchJobs = async (
+    page = 0,
+    sortBy = "createdAt",
+    dir: "asc" | "desc" = "desc",
+  ) => {
     setLoading(true);
-    const data = await jobsApi.getAll();
-    setJobs(data);
-    setLoading(false);
+    try {
+      const res = await jobsApi.getAll(page, sortBy, dir);
+      setJobs(res.content);
+      setPage(res.number);
+      setTotalPages(res.totalPages);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -26,7 +43,15 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <JobsContext.Provider value={{ jobs, loading, fetchJobs }}>
+    <JobsContext.Provider
+      value={{
+        jobs,
+        loading,
+        page,
+        totalPages,
+        fetchJobs,
+      }}
+    >
       {children}
     </JobsContext.Provider>
   );

@@ -2,6 +2,7 @@ package get_hired.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,4 +23,6 @@ public class Job {
 
     @Column(length = 2000)
     private String description;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
