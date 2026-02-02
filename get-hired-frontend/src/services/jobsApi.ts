@@ -1,13 +1,14 @@
 import { api } from "@/lib/api";
-import type{ Job } from "@/types/job";
+import type { Job } from "@/types/job";
+
 export interface JobsResponse {
   content: Job[];
   totalPages: number;
   number: number;
 }
 
-
 export const jobsApi = {
+  // ✅ Get all jobs (paginated)
   getAll: async (
     page: number,
     sortBy: string,
@@ -18,15 +19,21 @@ export const jobsApi = {
     });
     return res.data;
   },
-  getById: async (id: string) => {
+
+  // ✅ Get job by ID
+  getById: async (id: string): Promise<Job> => {
     const res = await api.get(`/jobs/${id}`);
     return res.data;
   },
 
-  //   applyJob: async (id: string): Promise<void> => {
-  //     await api.post(`/jobs/${id}/apply`);
-  //   },
-  delete: async (id: string) => {
+  // ✅ CREATE / POST JOB (Recruiter / Admin)
+  create: async (job: Partial<Job>): Promise<Job> => {
+    const res = await api.post("/jobs", job);
+    return res.data;
+  },
+
+  // ✅ Delete job
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/jobs/${id}`);
   },
 };

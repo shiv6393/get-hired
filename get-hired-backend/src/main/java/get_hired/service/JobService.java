@@ -16,7 +16,7 @@ public class JobService {
         return jobRepository.findAll();
     }
 
-    public Job getJobById(String id) {
+    public Job getJobById(long id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
     }
@@ -25,7 +25,7 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    public void deleteJob(String id) {
+    public void deleteJob(long id) {
         jobRepository.deleteById(id);
     }
 }

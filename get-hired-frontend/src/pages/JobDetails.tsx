@@ -1,12 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import ApplyJobModal from "@/components/ui/jobs/ApplyJobModal";
 import type { Job as JobDetailsType } from "@/types/job";
 import { useEffect, useState } from "react";
 import { jobsApi } from "@/services/jobsApi";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 export default function JobDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { role } = useAuth();
 
   const [job, setJob] = useState<JobDetailsType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +24,7 @@ export default function JobDetails() {
         setLoading(true);
         const data = await jobsApi.getById(id);
         setJob(data);
-      } catch (err) {
+      } catch {
         setError("Unable to load job details");
       } finally {
         setLoading(false);
@@ -61,7 +65,28 @@ export default function JobDetails() {
         <p className="text-sm">{job.description}</p>
       </div>
 
-      <ApplyJobModal job={job} />
+      {/* ================= APPLY SECTION ================= */}
+
+      {!role && (
+        <Button
+          className="w-full"
+          onClick={() =>
+            navigate("/login", {
+              state: { redirectTo: `/jobs/${job.id}` },
+            })
+          }
+        >
+          Login to Apply
+        </Button>
+      )}
+
+      {role === "USER" && <ApplyJobModal job={job} />}
+
+      {(role === "RECRUITER" || role === "ADMIN") && (
+        <p className="text-sm text-muted-foreground">
+          Recruiters cannot apply for jobs.
+        </p>
+      )}
     </div>
   );
 }

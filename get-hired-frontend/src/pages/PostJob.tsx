@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useJobs } from "@/context/JobsContext";
-import type{ Job } from "@/types/job";
+import type { Job } from "@/types/job";
 
 export default function PostJob() {
   const { addJob } = useJobs();
 
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -14,20 +15,23 @@ export default function PostJob() {
     type: "Full-time" as Job["type"],
   });
 
-  const handleSubmit = () => {
-    const newJob: Job = {
-      id: Date.now().toString(),
-      ...form,
-    };
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
 
-    addJob(newJob);
+      // ✅ DO NOT create ID here
+      await addJob(form);
 
-    setForm({
-      title: "",
-      company: "",
-      location: "",
-      type: "Full-time",
-    });
+      // ✅ Reset form after success
+      setForm({
+        title: "",
+        company: "",
+        location: "",
+        type: "Full-time",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,10 +70,10 @@ export default function PostJob() {
 
       <Button
         onClick={handleSubmit}
-        disabled={!form.title || !form.company}
+        disabled={loading || !form.title || !form.company}
         className="w-full"
       >
-        Post Job
+        {loading ? "Posting..." : "Post Job"}
       </Button>
     </div>
   );

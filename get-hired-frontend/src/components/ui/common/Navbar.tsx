@@ -51,9 +51,18 @@ export default function Navbar() {
           )}
 
           {(role === "RECRUITER" || role === "ADMIN") && (
-            <Link to="/recruiter/dashboard" className={navLink}>
-              Recruiter
-            </Link>
+            <>
+              {/* Primary CTA */}
+              <Link to="/recruiter/post-job">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Post Job
+                </Button>
+              </Link>
+
+              <Link to="/recruiter/dashboard" className={navLink}>
+                Recruiter
+              </Link>
+            </>
           )}
 
           {role === "ADMIN" && (
@@ -114,10 +123,26 @@ export default function Navbar() {
               </Link>
             )}
 
-            {role === "USER" && <Link to="/user">Dashboard</Link>}
+            {role === "USER" && (
+              <Link to="/user" onClick={() => setOpen(false)}>
+                Dashboard
+              </Link>
+            )}
 
             {(role === "RECRUITER" || role === "ADMIN") && (
-              <Link to="/recruiter/dashboard">Recruiter</Link>
+              <>
+                <Link
+                  to="/recruiter/post-job"
+                  onClick={() => setOpen(false)}
+                  className="font-semibold text-blue-600"
+                >
+                  Post Job
+                </Link>
+
+                <Link to="/recruiter/dashboard" onClick={() => setOpen(false)}>
+                  Recruiter Dashboard
+                </Link>
+              </>
             )}
 
             {role === "ADMIN" && (
