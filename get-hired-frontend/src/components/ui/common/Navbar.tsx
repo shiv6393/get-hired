@@ -34,25 +34,25 @@ export default function Navbar() {
 
         {/* ================= DESKTOP MENU ================= */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/jobs" className="nav-link">
+          <Link to="/jobs" className={navLink}>
             Jobs
           </Link>
 
           {role && (
-            <Link to="/applied" className="nav-link">
+            <Link to="/applied" className={navLink}>
               Applied Jobs
             </Link>
           )}
 
           {role === "USER" && (
-            <Link to="/user" className="nav-link">
+            <Link to="/user" className={navLink}>
               Dashboard
             </Link>
           )}
 
           {(role === "RECRUITER" || role === "ADMIN") && (
-            <Link to="/recruiter/post-job" className="nav-link">
-              Post Job
+            <Link to="/recruiter/dashboard" className={navLink}>
+              Recruiter
             </Link>
           )}
 
@@ -117,7 +117,7 @@ export default function Navbar() {
             {role === "USER" && <Link to="/user">Dashboard</Link>}
 
             {(role === "RECRUITER" || role === "ADMIN") && (
-              <Link to="/recruiter/post-job">Post Job</Link>
+              <Link to="/recruiter/dashboard">Recruiter</Link>
             )}
 
             {role === "ADMIN" && (
@@ -153,6 +153,6 @@ export default function Navbar() {
   );
 }
 
-/* Tailwind helper */
+/* ✅ Tailwind helper */
 const navLink =
   "text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors";

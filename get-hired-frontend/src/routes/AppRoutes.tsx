@@ -10,6 +10,7 @@ import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import UserDashboard from "@/pages/user/UserDashboard";
+import RecruiterDashboard from "@/pages/recruiter/RecruiterDashboard";
 
 
 
@@ -55,6 +56,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["USER"]}>
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/recruiter/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["RECRUITER", "ADMIN"]}>
+            <RecruiterDashboard />
           </ProtectedRoute>
         }
       />
