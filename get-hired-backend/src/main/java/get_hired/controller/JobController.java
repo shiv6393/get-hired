@@ -1,83 +1,108 @@
 package get_hired.controller;
 
-import get_hired.dto.JobResponseDto;
-import get_hired.entity.Application;
+import get_hired.dto.CreateJobRequest;
+import get_hired.dto.JobResponse;
 import get_hired.entity.Job;
-import get_hired.repository.ApplicationRepository;
+import get_hired.entity.Recruiter;
 import get_hired.repository.JobRepository;
-import get_hired.service.JobService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import get_hired.repository.RecruiterRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.Map;
+import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/jobs")
-@RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") // Vite frontend
 public class JobController {
 
-    private final JobService jobService;
     private final JobRepository jobRepository;
-    private final ApplicationRepository applicationRepository;
+    private final RecruiterRepository recruiterRepository;
 
-    // ✅ GET all jobs (pagination + sorting)
-    @GetMapping
-    public Page<Job> getJobs(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "6") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction
-    ) {
-        Sort sort = direction.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-
-        PageRequest pageable = PageRequest.of(page, size, sort);
-        return jobRepository.findAll(pageable);
+    public JobController(JobRepository jobRepository,
+                         RecruiterRepository recruiterRepository) {
+        this.jobRepository = jobRepository;
+        this.recruiterRepository = recruiterRepository;
     }
 
-    // ✅ GET job by id
-    @GetMapping("/{id}")
-    public Job getJob(@PathVariable Long id) {
-        return jobService.getJobById(id);
-    }
-
-    // ✅ CREATE job
+    // -------------------------------
+    // CREATE JOB (PHASE 1)
+    // -------------------------------
     @PostMapping
-    public Job createJob(@RequestBody Job job) {
-        return jobService.createJob(job);
+    public ResponseEntity<Void> createJob(
+            @RequestBody CreateJobRequest request
+    ) {
+         Recruiter recruiter = recruiterRepository
+                .findById(request.getRecruiterId())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Recruiter not found"
+                        )
+                );
+
+        Job job = new Job();
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setLocation(request.getLocation());
+        job.setSalary(request.getSalary());
+        job.setRecruiter(recruiter);
+        job.setCreatedAt(Instant.now());
+
+        jobRepository.save(job);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // ✅ DELETE job
-    @DeleteMapping("/{id}")
-    public void deleteJob(@PathVariable Long id) {
-        jobService.deleteJob(id);
+    // -------------------------------
+    // GET ALL JOBS (PUBLIC)
+    // -------------------------------
+    @GetMapping
+    public ResponseEntity<List<JobResponse>> getAllJobs() {
+
+        List<JobResponse> jobs = jobRepository.findAll()
+                .stream()
+                .map(JobResponse::fromEntity)
+                .toList();
+
+        return ResponseEntity.ok(jobs);
     }
 
-    // ✅ APPLY for a job (NO AUTH FOR NOW)
-    @PostMapping("/{id}/apply")
-    public Map<String, String> applyJob(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> payload
+    // -------------------------------
+    // GET JOB BY ID
+    // -------------------------------
+    @GetMapping("/{id}")
+    public ResponseEntity<JobResponse> getJobById(
+            @PathVariable String id
     ) {
         Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Job not found"
+                        )
+                );
 
-        Application application = Application.builder()
-                .applicantName(payload.get("applicantName"))
-                .email(payload.get("email"))
-                .resumeUrl(payload.get("resumeUrl"))
-                .appliedAt(LocalDateTime.now())
-                .job(job)
-                .build();
+        return ResponseEntity.ok(JobResponse.fromEntity(job));
+    }
 
-        applicationRepository.save(application);
+    // -------------------------------
+    // DELETE JOB (PHASE 1)
+    // -------------------------------
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteJob(
+            @PathVariable String id
+    ) {
+        if (!jobRepository.existsById(id)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Job not found"
+            );
+        }
 
-        return Map.of("message", "Application submitted successfully");
+        jobRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

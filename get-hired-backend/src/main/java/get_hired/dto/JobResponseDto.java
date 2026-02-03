@@ -2,12 +2,9 @@ package get_hired.dto;
 
 import get_hired.entity.Job;
 import lombok.Builder;
-import lombok.Getter;
-
-@Getter
 @Builder
 public class JobResponseDto {
-    private Long id;
+    private String id;
     private String title;
     private String company;
     private String location;
@@ -17,7 +14,7 @@ public class JobResponseDto {
         return JobResponseDto.builder()
                 .id(job.getId())
                 .title(job.getTitle())
-                .company(job.getCompany())
+                .company(job.getRecruiter().)
                 .location(job.getLocation())
                 .applicantsCount(job.getApplications().size())
                 .build();

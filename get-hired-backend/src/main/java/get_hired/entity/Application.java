@@ -1,43 +1,22 @@
 package get_hired.entity;
-
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
-
+import java.time.Instant;
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Table(
-        name = "applications",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"job_id", "email"})
-        }
-)
+@Table(name = "applications",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"job_id", "candidate_email"}))
 public class Application {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-    // Applicant details
-    @Column(nullable = false)
-    private String applicantName;
-
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
-    private String resumeUrl;
-
-    @Column(nullable = false)
-    private LocalDateTime appliedAt;
-
-    // Relationship to Job
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "job_id")
     private Job job;
+
+    private String candidateEmail;
+    private String resumeUrl;
+    private String coverLetter;
+
+    private Instant appliedAt;
 }
