@@ -76,7 +76,7 @@ export default function JobDetails() {
             })
           }
         >
-          Login to Apply
+          You are not Loggedin
         </Button>
       )}
 
