@@ -3,6 +3,7 @@ package get_hired.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @ControllerAdvice
@@ -69,4 +70,23 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(status).body(error);
     }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .orElse("Validation error");
+
+        return buildError(
+                HttpStatus.BAD_REQUEST,
+                message,
+                request
+        );
+    }
+
 }

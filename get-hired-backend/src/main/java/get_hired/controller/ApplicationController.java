@@ -1,6 +1,7 @@
 package get_hired.controller;
 
 import get_hired.service.ApplicationService;
+import get_hired.validation.FileValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,8 @@ public class ApplicationController {
     ) {
         String candidateId = authentication.getName();
 
-        // Phase-2: file storage service will generate URL
+        FileValidator.validateResume(resume);
+
         String resumeUrl = "uploads/" + resume.getOriginalFilename();
 
         applicationService.applyJob(
@@ -39,4 +41,5 @@ public class ApplicationController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
 }

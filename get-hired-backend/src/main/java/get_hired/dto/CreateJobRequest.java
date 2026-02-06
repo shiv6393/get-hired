@@ -1,18 +1,28 @@
 package get_hired.dto;
 
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class CreateJobRequest {
+
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, max = 100)
     private String title;
+
+    @NotBlank(message = "Description is required")
+    @Size(min = 10, max = 5000)
     private String description;
+
+    @NotBlank(message = "Location is required")
     private String location;
+
+    @NotNull(message = "Salary is required")
+    @Positive(message = "Salary must be positive")
     private Double salary;
-    private String recruiterId;
+
+    // getters & setters
 }

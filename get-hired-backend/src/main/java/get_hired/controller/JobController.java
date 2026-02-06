@@ -3,6 +3,7 @@ package get_hired.controller;
 import get_hired.dto.CreateJobRequest;
 import get_hired.entity.Job;
 import get_hired.service.JobService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class JobController {
     // CREATE JOB
     @PostMapping
     public ResponseEntity<Void> createJob(
-            @RequestBody CreateJobRequest request,
+            @Valid @RequestBody CreateJobRequest request,
             Authentication authentication
     ) {
         String recruiterId = authentication.getName();
@@ -38,6 +39,7 @@ public class JobController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
 
     // GET JOBS BY RECRUITER (Dashboard)
     @GetMapping("/my")
