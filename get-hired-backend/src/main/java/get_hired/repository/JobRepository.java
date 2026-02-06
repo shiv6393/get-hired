@@ -12,4 +12,6 @@ public interface JobRepository extends JpaRepository<Job, String> {
 
     boolean existsByIdAndRecruiter_Id(String jobId, String recruiterId);
     Page<Job> findAll(Pageable pageable);
+    long countByRecruiter_Id(String recruiterId);
+
 }

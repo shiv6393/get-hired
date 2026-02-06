@@ -1,8 +1,11 @@
 package get_hired.controller.recruiter;
 import get_hired.dto.ApplicantResponseDto;
+import get_hired.dto.JobApplicationCountDto;
+import get_hired.dto.RecruiterDashboardStatsDto;
 import get_hired.entity.Recruiter;
 import get_hired.entity.User;
 import get_hired.service.ApplicationService;
+import get_hired.service.RecruiterAnalyticsService;
 import get_hired.service.RecruiterService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +21,13 @@ public class RecruiterController {
 
     private final RecruiterService recruiterService;
     private final ApplicationService applicationService;
+    private final RecruiterAnalyticsService recruiterAnalyticsService;
 
-    public RecruiterController(RecruiterService recruiterService,ApplicationService applicationService) {
+    public RecruiterController(RecruiterService recruiterService,ApplicationService applicationService,RecruiterAnalyticsService recruiterAnalyticsService) {
         this.recruiterService = recruiterService;
         this.applicationService=applicationService;
+        this.recruiterAnalyticsService=recruiterAnalyticsService;
+
     }
 
     //
@@ -52,6 +58,27 @@ public class RecruiterController {
 
         return ResponseEntity.ok(
                 applicationService.getApplicantsForJob(jobId, recruiterId)
+        );
+    }
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/dashboard/stats")
+    public ResponseEntity<RecruiterDashboardStatsDto> getDashboardStats(
+            Authentication authentication
+    ) {
+        String recruiterId = authentication.getName();
+        return ResponseEntity.ok(
+                recruiterAnalyticsService.getDashboardStats(recruiterId)
+        );
+    }
+
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/dashboard/jobs/applications")
+    public ResponseEntity<List<JobApplicationCountDto>> getApplicationsPerJob(
+            Authentication authentication
+    ) {
+        String recruiterId = authentication.getName();
+        return ResponseEntity.ok(
+                recruiterAnalyticsService.getApplicationsPerJob(recruiterId)
         );
     }
 
