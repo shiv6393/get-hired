@@ -1,6 +1,7 @@
 package get_hired.service;
 
 import get_hired.dto.ApplicantResponseDto;
+import get_hired.dto.AppliedJobResponseDto;
 import get_hired.entity.Application;
 import get_hired.entity.Job;
 import get_hired.entity.User;
@@ -11,6 +12,8 @@ import get_hired.repository.ApplicationRepository;
 import get_hired.repository.JobRepository;
 import get_hired.repository.UserRepository;
 import get_hired.storage.FileStorageService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -84,5 +87,18 @@ public class ApplicationService {
                 .stream()
                 .map(ApplicantResponseDto::fromEntity)
                 .toList();
+    }
+
+    public Page<AppliedJobResponseDto> getAppliedJobsForCandidate(
+            String candidateId,
+            Pageable pageable
+    ) {
+        User candidate = userRepository.findById(candidateId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Candidate not found"));
+
+        return applicationRepository
+                .findAllByCandidate(candidate, pageable)
+                .map(AppliedJobResponseDto::fromEntity);
     }
 }
