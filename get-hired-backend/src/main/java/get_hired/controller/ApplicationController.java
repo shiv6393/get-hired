@@ -30,12 +30,10 @@ public class ApplicationController {
 
         FileValidator.validateResume(resume);
 
-        String resumeUrl = "uploads/" + resume.getOriginalFilename();
-
         applicationService.applyJob(
                 jobId,
                 candidateId,
-                resumeUrl,
+                resume,
                 coverLetter
         );
 

@@ -15,9 +15,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        # You can remove the dialect line below to fix the warning from your logs,
-        # as Hibernate 6+ detects it automatically.
+        # Hibernate 6+ auto-detects dialect
         # dialect: org.hibernate.dialect.MySQLDialect
+
+app:
+  upload:
+    dir: uploads
 
 server:
   port: 8080
