@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Entity
 @Table(name = "recruiters")
 @Getter
@@ -13,11 +14,16 @@ import java.util.List;
 public class Recruiter {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    private String id; // SAME AS user.id
 
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "id")
+    private User user;
+
+    @Column(nullable = false)
     private String companyName;
-    private String email;
+
     private String website;
     private String location;
 

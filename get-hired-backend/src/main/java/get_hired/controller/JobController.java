@@ -6,6 +6,7 @@ import get_hired.entity.Job;
 import get_hired.entity.Recruiter;
 import get_hired.repository.JobRepository;
 import get_hired.repository.RecruiterRepository;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/jobs")
 public class JobController {
@@ -27,21 +27,16 @@ public class JobController {
         this.recruiterRepository = recruiterRepository;
     }
 
-    // -------------------------------
-    // CREATE JOB (PHASE 1)
-    // -------------------------------
     @PostMapping
     public ResponseEntity<Void> createJob(
-            @RequestBody CreateJobRequest request
+            @RequestBody CreateJobRequest request,
+            Authentication auth
     ) {
-         Recruiter recruiter = recruiterRepository
-                .findById(request.getRecruiterId())
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Recruiter not found"
-                        )
-                );
+        String recruiterId = auth.getName();
+
+        Recruiter recruiter = recruiterRepository.findById(recruiterId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Recruiter profile not found"));
 
         Job job = new Job();
         job.setTitle(request.getTitle());
@@ -52,57 +47,14 @@ public class JobController {
         job.setCreatedAt(Instant.now());
 
         jobRepository.save(job);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // -------------------------------
-    // GET ALL JOBS (PUBLIC)
-    // -------------------------------
     @GetMapping
-    public ResponseEntity<List<JobResponse>> getAllJobs() {
-
-        List<JobResponse> jobs = jobRepository.findAll()
+    public List<JobResponse> getJobs() {
+        return jobRepository.findAll()
                 .stream()
-                .map(JobResponse::fromEntity)
+                .map(JobResponse::from)
                 .toList();
-
-        return ResponseEntity.ok(jobs);
-    }
-
-    // -------------------------------
-    // GET JOB BY ID
-    // -------------------------------
-    @GetMapping("/{id}")
-    public ResponseEntity<JobResponse> getJobById(
-            @PathVariable String id
-    ) {
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "Job not found"
-                        )
-                );
-
-        return ResponseEntity.ok(JobResponse.fromEntity(job));
-    }
-
-    // -------------------------------
-    // DELETE JOB (PHASE 1)
-    // -------------------------------
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteJob(
-            @PathVariable String id
-    ) {
-        if (!jobRepository.existsById(id)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Job not found"
-            );
-        }
-
-        jobRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

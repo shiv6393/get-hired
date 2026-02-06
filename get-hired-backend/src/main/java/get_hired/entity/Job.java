@@ -12,22 +12,25 @@ import java.time.Instant;
 @Table(name = "jobs")
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class Job {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(length = 5000)
     private String description;
+
     private String location;
     private Double salary;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruiter_id", nullable = false)
     private Recruiter recruiter;
 
+    @Column(nullable = false, updatable = false)
     private Instant createdAt;
 }

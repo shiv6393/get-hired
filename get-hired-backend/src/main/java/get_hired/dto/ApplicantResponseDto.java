@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ApplicantResponseDto {
 
-    private Long id;
+    private String  id;
     private String applicantName;
     private String email;
     private String resumeUrl;
