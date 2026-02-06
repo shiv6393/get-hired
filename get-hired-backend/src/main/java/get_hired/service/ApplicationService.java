@@ -3,6 +3,7 @@ package get_hired.service;
 import get_hired.entity.Application;
 import get_hired.entity.Job;
 import get_hired.entity.User;
+import get_hired.exception.ConflictException;
 import get_hired.repository.ApplicationRepository;
 import get_hired.repository.JobRepository;
 import get_hired.repository.UserRepository;
@@ -39,8 +40,9 @@ public class ApplicationService {
                 .orElseThrow(() ->
                         new IllegalStateException("Candidate not found"));
 
+
         if (applicationRepository.existsByJobAndCandidate(job, candidate)) {
-            throw new IllegalStateException("Already applied for this job");
+            throw new ConflictException("Already applied for this job");
         }
 
         Application application = new Application();

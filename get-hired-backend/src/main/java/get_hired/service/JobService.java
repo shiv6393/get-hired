@@ -2,6 +2,8 @@ package get_hired.service;
 
 import get_hired.entity.Job;
 import get_hired.entity.Recruiter;
+import get_hired.exception.BadRequestException;
+import get_hired.exception.ResourceNotFoundException;
 import get_hired.repository.JobRepository;
 import get_hired.repository.RecruiterRepository;
 import org.springframework.data.domain.Page;
@@ -22,6 +24,7 @@ public class JobService {
         this.recruiterRepository = recruiterRepository;
     }
 
+    // CREATE JOB
     public Job createJob(
             String recruiterId,
             String title,
@@ -31,7 +34,7 @@ public class JobService {
     ) {
         Recruiter recruiter = recruiterRepository.findById(recruiterId)
                 .orElseThrow(() ->
-                        new IllegalStateException("Recruiter profile not found"));
+                        new ResourceNotFoundException("Recruiter profile not found"));
 
         Job job = new Job();
         job.setTitle(title);
@@ -44,17 +47,22 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    public Page<Job> getJobsByRecruiter(String recruiterId, Pageable pageable) {
+    // GET JOBS BY RECRUITER (DASHBOARD)
+    public Page<Job> getJobsByRecruiter(
+            String recruiterId,
+            Pageable pageable
+    ) {
         Recruiter recruiter = recruiterRepository.findById(recruiterId)
                 .orElseThrow(() ->
-                        new IllegalStateException("Recruiter profile not found"));
+                        new ResourceNotFoundException("Recruiter profile not found"));
 
         return jobRepository.findAllByRecruiter(recruiter, pageable);
     }
 
+    // DELETE JOB (OWNERSHIP CHECK)
     public void deleteJob(String jobId, String recruiterId) {
         if (!jobRepository.existsByIdAndRecruiter_Id(jobId, recruiterId)) {
-            throw new IllegalStateException("Job not found or access denied");
+            throw new BadRequestException("Job not found or access denied");
         }
         jobRepository.deleteById(jobId);
     }
