@@ -1,8 +1,10 @@
 package get_hired.service;
 
+import get_hired.dto.ApplicantResponseDto;
 import get_hired.entity.Application;
 import get_hired.entity.Job;
 import get_hired.entity.User;
+import get_hired.exception.BadRequestException;
 import get_hired.exception.ConflictException;
 import get_hired.exception.ResourceNotFoundException;
 import get_hired.repository.ApplicationRepository;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 public class ApplicationService {
@@ -62,5 +65,24 @@ public class ApplicationService {
         application.setAppliedAt(Instant.now());
 
         applicationRepository.save(application);
+    }
+
+    public List<ApplicantResponseDto> getApplicantsForJob(
+            String jobId,
+            String recruiterId
+    ) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Job not found"));
+
+        // Ownership check (CRITICAL)
+        if (!job.getRecruiter().getId().equals(recruiterId)) {
+            throw new BadRequestException("Access denied for this job");
+        }
+
+        return applicationRepository.findAllByJob(job)
+                .stream()
+                .map(ApplicantResponseDto::fromEntity)
+                .toList();
     }
 }

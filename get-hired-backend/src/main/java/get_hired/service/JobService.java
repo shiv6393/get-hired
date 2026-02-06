@@ -1,9 +1,11 @@
 package get_hired.service;
 
+import get_hired.dto.JobResponseDto;
 import get_hired.entity.Job;
 import get_hired.entity.Recruiter;
 import get_hired.exception.BadRequestException;
 import get_hired.exception.ResourceNotFoundException;
+import get_hired.repository.ApplicationRepository;
 import get_hired.repository.JobRepository;
 import get_hired.repository.RecruiterRepository;
 import org.springframework.data.domain.Page;
@@ -17,11 +19,13 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final RecruiterRepository recruiterRepository;
+    private final ApplicationRepository applicationRepository;
 
-    public JobService(JobRepository jobRepository,
+    public JobService(JobRepository jobRepository, ApplicationRepository applicationRepository,
                       RecruiterRepository recruiterRepository) {
         this.jobRepository = jobRepository;
         this.recruiterRepository = recruiterRepository;
+        this.applicationRepository=applicationRepository;
     }
 
     // CREATE JOB
@@ -65,5 +69,15 @@ public class JobService {
             throw new BadRequestException("Job not found or access denied");
         }
         jobRepository.deleteById(jobId);
+    }
+
+    public Page<JobResponseDto> getPublicJobs(Pageable pageable) {
+
+        Page<Job> jobs = jobRepository.findAll(pageable);
+
+        return jobs.map(job -> {
+            long applicantsCount = applicationRepository.countByJob(job);
+            return JobResponseDto.fromEntity(job, applicantsCount);
+        });
     }
 }

@@ -1,11 +1,14 @@
 package get_hired.controller;
 
 import get_hired.dto.CreateJobRequest;
+import get_hired.dto.JobResponseDto;
 import get_hired.entity.Job;
 import get_hired.service.JobService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -67,4 +70,20 @@ public class JobController {
         jobService.deleteJob(id, recruiterId);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/public")
+    public ResponseEntity<Page<JobResponseDto>> getPublicJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String dir
+    ) {
+        Sort sort = dir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return ResponseEntity.ok(jobService.getPublicJobs(pageable));
+    }
+
 }
