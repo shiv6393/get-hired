@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +26,7 @@ public class JobController {
     }
 
     // CREATE JOB
+    @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping
     public ResponseEntity<Void> createJob(
             @Valid @RequestBody CreateJobRequest request,
@@ -45,6 +47,7 @@ public class JobController {
 
 
     // GET JOBS BY RECRUITER (Dashboard)
+    @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/my")
     public ResponseEntity<Page<Job>> getMyJobs(
             Authentication authentication,
@@ -61,6 +64,7 @@ public class JobController {
     }
 
     // DELETE JOB
+    @PreAuthorize("hasRole('RECRUITER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteJob(
             @PathVariable String id,

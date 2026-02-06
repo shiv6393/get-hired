@@ -5,6 +5,7 @@ import get_hired.service.ApplicationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class CandidateController {
     public CandidateController(ApplicationService applicationService) {
         this.applicationService = applicationService;
     }
-
+    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/applications")
     public ResponseEntity<Page<AppliedJobResponseDto>> getMyAppliedJobs(
             Authentication authentication,

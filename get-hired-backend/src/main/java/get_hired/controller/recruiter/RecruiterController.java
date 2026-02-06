@@ -6,6 +6,7 @@ import get_hired.service.ApplicationService;
 import get_hired.service.RecruiterService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,7 +24,9 @@ public class RecruiterController {
         this.applicationService=applicationService;
     }
 
-    // Create recruiter profile (Phase-2: user from JWT)
+    //
+    //Create recruiter profile (Phase-2: user from JWT)
+    @PreAuthorize("hasRole('RECRUITER')")
     @PostMapping
     public ResponseEntity<Void> createRecruiterProfile(
             @RequestBody Recruiter recruiter,
