@@ -49,4 +49,8 @@ export const recruiterApi = {
     const res = await api.put(`/jobs/${jobId}`, payload);
     return res;
   },
+  // 🔹 Recruiter: delete job
+  deleteJob: async (jobId: string) => {
+    return api.delete(`/jobs/${jobId}`);
+  },
 };

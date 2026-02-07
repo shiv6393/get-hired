@@ -67,20 +67,24 @@ public class JobService {
 
     // DELETE JOB (OWNERSHIP CHECK)
     public void deleteJob(String jobId, String recruiterId) {
-        if (!jobRepository.existsByIdAndRecruiter_Id(jobId, recruiterId)) {
-            throw new BadRequestException("Job not found or access denied");
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        // 🔐 Ownership check
+        if (!job.getRecruiter().getId().equals(recruiterId)) {
+            throw new BadRequestException("Access denied");
         }
-        jobRepository.deleteById(jobId);
-    }
 
-    public Page<JobResponseDto> getPublicJobs(Pageable pageable) {
+        // 🛑 Block delete if applicants exist
+        long applicantsCount = applicationRepository.countByJob(job);
+        if (applicantsCount > 0) {
+            throw new BadRequestException(
+                    "Cannot delete job with existing applications"
+            );
+        }
 
-        Page<Job> jobs = jobRepository.findAll(pageable);
-
-        return jobs.map(job -> {
-            long applicantsCount = applicationRepository.countByJob(job);
-            return JobResponseDto.fromEntity(job, applicantsCount);
-        });
+        jobRepository.delete(job);
     }
 
     public JobDetailsResponseDto getJobDetails(String jobId) {
@@ -119,5 +123,6 @@ public class JobService {
 
         return JobResponseDto.fromEntity(updatedJob, applicantsCount);
     }
+
 }
 

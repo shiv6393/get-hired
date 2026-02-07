@@ -3,6 +3,7 @@ import { recruiterApi } from "@/services/recruiterApi";
 import { Button } from "@/components/ui/button";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface RecruiterJob {
   id: string;
@@ -33,7 +34,6 @@ export default function RecruiterDashboard() {
 
       const res = await recruiterApi.getMyJobs(pageNumber, "createdAt", "desc");
 
-      // ✅ backend Page<JobResponseDto>
       setJobs(res.data.content);
       setPage(res.data.number);
       setTotalPages(res.data.totalPages);
@@ -47,6 +47,28 @@ export default function RecruiterDashboard() {
   useEffect(() => {
     fetchJobs(0);
   }, []);
+
+  // 🔴 DELETE JOB HANDLER (STEP 2)
+  const handleDelete = async (jobId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this job?",
+    );
+    if (!confirmed) return;
+
+    try {
+      await recruiterApi.deleteJob(jobId);
+
+      // Remove from UI
+      setJobs((prev) => prev.filter((job) => job.id !== jobId));
+
+      toast.success("Job deleted successfully");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          "Cannot delete job with existing applicants",
+      );
+    }
+  };
 
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading jobs...</p>;
@@ -82,9 +104,25 @@ export default function RecruiterDashboard() {
                   </p>
                 </div>
 
-                <Link to={`/recruiter/jobs/${job.id}/applicants`}>
-                  <Button size="sm">View Applicants</Button>
-                </Link>
+                <div className="flex gap-2">
+                  <Link to={`/recruiter/jobs/${job.id}/applicants`}>
+                    <Button size="sm" variant="outline">
+                      Applicants
+                    </Button>
+                  </Link>
+
+                  <Link to={`/recruiter/jobs/${job.id}/edit`}>
+                    <Button size="sm">Edit</Button>
+                  </Link>
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDelete(job.id)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
