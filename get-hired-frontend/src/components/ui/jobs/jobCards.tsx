@@ -29,7 +29,9 @@ export default function JobCard({
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">{job.title}</CardTitle>
-            <Badge variant="secondary">{job.type}</Badge>
+
+            {/* Backend-safe badge */}
+            <Badge variant="secondary">{job.applicantsCount} applied</Badge>
           </div>
 
           <p className="text-sm text-muted-foreground">{job.company}</p>

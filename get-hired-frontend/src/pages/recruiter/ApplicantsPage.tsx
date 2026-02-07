@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import { recruiterApi } from "@/services/recruiterApi";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 interface Applicant {
   id: string;
@@ -12,23 +13,46 @@ interface Applicant {
 }
 
 export default function ApplicantsPage() {
-  const { jobId } = useParams();
+  const { jobId } = useParams<{ jobId: string }>();
+  const { role } = useAuth();
+
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 🔐 Role protection
+  if (role !== "RECRUITER") {
+    return <Navigate to="/" replace />;
+  }
 
   useEffect(() => {
     if (!jobId) return;
 
-    recruiterApi.getApplicants(jobId).then((data) => {
-      setApplicants(data);
-      setLoading(false);
-    });
+    const fetchApplicants = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await recruiterApi.getApplicants(jobId);
+        setApplicants(res.data);
+      } catch {
+        setError("Failed to load applicants");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplicants();
   }, [jobId]);
 
   if (loading) {
     return (
       <p className="text-sm text-muted-foreground">Loading applicants...</p>
     );
+  }
+
+  if (error) {
+    return <p className="text-sm text-red-500">{error}</p>;
   }
 
   return (

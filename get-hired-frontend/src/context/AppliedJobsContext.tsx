@@ -1,56 +1,50 @@
-import { createContext, useContext, useState,useEffect } from "react";
-import type{ Job } from "@/types/job";
+import { createContext, useContext, useEffect, useState } from "react";
+import type { AppliedJob } from "@/types/appliedJob";
+import { applicationsApi } from "@/services/applicationsApi";
+
 interface AppliedJobsContextType {
-  appliedJobs: Job[];
-  applyToJob: (job: Job) => void;
-  isApplied: (jobId: string) => boolean;
+  appliedJobs: AppliedJob[];
+  loading: boolean;
+  fetchAppliedJobs: () => Promise<void>;
 }
 
 const AppliedJobsContext = createContext<AppliedJobsContextType | null>(null);
-
-const STORAGE_KEY = "applied_jobs";
 
 export function AppliedJobsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [appliedJobs, setAppliedJobs] = useState<Job[]>([]);
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // 🔹 Load from localStorage on first render
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setAppliedJobs(JSON.parse(stored));
+  const fetchAppliedJobs = async () => {
+    try {
+      setLoading(true);
+      const res = await applicationsApi.getMyAppliedJobs();
+      setAppliedJobs(res.data.content);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchAppliedJobs();
   }, []);
 
-  // 🔹 Save to localStorage whenever appliedJobs changes
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appliedJobs));
-  }, [appliedJobs]);
-
-  const applyToJob = (job: Job) => {
-    if (!appliedJobs.some((j) => j.id === job.id)) {
-      setAppliedJobs((prev) => [...prev, job]);
-    }
-  };
-
-  const isApplied = (jobId: string) => {
-    return appliedJobs.some((job) => job.id === jobId);
-  };
-
   return (
-    <AppliedJobsContext.Provider value={{ appliedJobs, applyToJob, isApplied }}>
+    <AppliedJobsContext.Provider
+      value={{ appliedJobs, loading, fetchAppliedJobs }}
+    >
       {children}
     </AppliedJobsContext.Provider>
   );
 }
 
 export const useAppliedJobs = () => {
-  const context = useContext(AppliedJobsContext);
-  if (!context) {
+  const ctx = useContext(AppliedJobsContext);
+  if (!ctx) {
     throw new Error("useAppliedJobs must be used inside AppliedJobsProvider");
   }
-  return context;
+  return ctx;
 };

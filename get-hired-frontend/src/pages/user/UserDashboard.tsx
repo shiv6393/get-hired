@@ -1,20 +1,30 @@
 import { useAppliedJobs } from "@/context/AppliedJobsContext";
 import { useAuth } from "@/context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 export default function UserDashboard() {
-  const { appliedJobs } = useAppliedJobs();
+  const { appliedJobs, loading } = useAppliedJobs();
   const { role } = useAuth();
+
+  // 🔐 Role protection
+  if (role !== "CANDIDATE") {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 space-y-6">
-      <h1 className="text-2xl font-bold">Welcome {role}</h1>
+      <h1 className="text-2xl font-bold">Candidate Dashboard</h1>
 
-      {/* Stats */}
+      {/* ================= STATS ================= */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="border rounded-md p-4">
           <p className="text-sm text-muted-foreground">Applied Jobs</p>
-          <p className="text-2xl font-semibold">{appliedJobs.length}</p>
+
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          ) : (
+            <p className="text-2xl font-semibold">{appliedJobs.length}</p>
+          )}
         </div>
 
         <div className="border rounded-md p-4">
@@ -28,7 +38,7 @@ export default function UserDashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* ================= QUICK ACTIONS ================= */}
       <div className="flex gap-4">
         <Link to="/jobs" className="text-blue-600 font-medium">
           Browse Jobs →

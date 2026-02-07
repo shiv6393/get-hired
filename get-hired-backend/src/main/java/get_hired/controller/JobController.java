@@ -1,6 +1,8 @@
 package get_hired.controller;
 
 import get_hired.dto.CreateJobRequest;
+import get_hired.dto.JobDetailsResponseDto;
+import get_hired.dto.JobRequestDto;
 import get_hired.dto.JobResponseDto;
 import get_hired.entity.Job;
 import get_hired.service.JobService;
@@ -89,5 +91,36 @@ public class JobController {
 
         return ResponseEntity.ok(jobService.getPublicJobs(pageable));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<JobDetailsResponseDto> getJobById(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(
+                jobService.getJobDetails(id)
+        );
+    }
+    @PutMapping("/{jobId}")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<JobResponseDto> updateJob(
+            @PathVariable String jobId,
+            @Valid @RequestBody JobRequestDto dto,
+            Authentication authentication
+    ) {
+        String recruiterId = authentication.getName();
+
+        JobResponseDto response = jobService.updateJob(
+                jobId,
+                recruiterId,
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getLocation(),
+                dto.getSalary()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 }

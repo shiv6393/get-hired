@@ -1,5 +1,6 @@
 package get_hired.service;
 
+import get_hired.dto.JobDetailsResponseDto;
 import get_hired.dto.JobResponseDto;
 import get_hired.entity.Job;
 import get_hired.entity.Recruiter;
@@ -29,7 +30,7 @@ public class JobService {
     }
 
     // CREATE JOB
-    public Job createJob(
+    public JobResponseDto createJob(
             String recruiterId,
             String title,
             String description,
@@ -37,8 +38,7 @@ public class JobService {
             Double salary
     ) {
         Recruiter recruiter = recruiterRepository.findById(recruiterId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Recruiter profile not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Recruiter not found"));
 
         Job job = new Job();
         job.setTitle(title);
@@ -48,9 +48,11 @@ public class JobService {
         job.setRecruiter(recruiter);
         job.setCreatedAt(Instant.now());
 
-        return jobRepository.save(job);
-    }
+        Job savedJob = jobRepository.save(job);
 
+        // ✅ Inject applicants count (0 for new job)
+        return JobResponseDto.fromEntity(savedJob, 0);
+    }
     // GET JOBS BY RECRUITER (DASHBOARD)
     public Page<Job> getJobsByRecruiter(
             String recruiterId,
@@ -80,4 +82,42 @@ public class JobService {
             return JobResponseDto.fromEntity(job, applicantsCount);
         });
     }
+
+    public JobDetailsResponseDto getJobDetails(String jobId) {
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Job not found"));
+
+        long applicantsCount = applicationRepository.countByJob(job);
+
+        return JobDetailsResponseDto.fromEntity(job, applicantsCount);
+    }
+    public JobResponseDto updateJob(
+            String jobId,
+            String recruiterId,
+            String title,
+            String description,
+            String location,
+            Double salary
+    ) {
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+
+        if (!job.getRecruiter().getId().equals(recruiterId)) {
+            throw new BadRequestException("Access denied");
+        }
+
+        job.setTitle(title);
+        job.setDescription(description);
+        job.setLocation(location);
+        job.setSalary(salary);
+
+        Job updatedJob = jobRepository.save(job);
+
+        long applicantsCount = applicationRepository.countByJob(updatedJob);
+
+        return JobResponseDto.fromEntity(updatedJob, applicantsCount);
+    }
 }
+

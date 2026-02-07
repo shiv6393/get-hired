@@ -18,42 +18,52 @@ interface Props {
   job: Job;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export default function ApplyJobModal({ job }: Props) {
-  const [open, setOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [coverLetter, setCoverLetter] = useState<string>("");
+  const [coverLetter, setCoverLetter] = useState("");
 
-  const handleApply = async (): Promise<void> => {
+  const handleApply = async () => {
     if (!resumeFile) {
       toast.error("Please upload your resume");
+      return;
+    }
+
+    if (resumeFile.size > MAX_FILE_SIZE) {
+      toast.error("Resume must be smaller than 5MB");
       return;
     }
 
     try {
       setLoading(true);
 
-      const formData: FormData = new FormData();
-      formData.append("jobId", job.id.toString());
+      const formData = new FormData();
+      formData.append("jobId", job.id);
       formData.append("resume", resumeFile);
       formData.append("coverLetter", coverLetter);
 
       await applicationsApi.apply(formData);
 
-      toast.success("Applied successfully");
+      toast.success("Applied successfully 🎉");
       setOpen(false);
-
       setResumeFile(null);
       setCoverLetter("");
-    } catch (error: unknown) {
-      console.error("Apply failed", error);
+    } catch (error: any) {
+      if (error?.response?.status === 409) {
+        toast.error("You have already applied for this job");
+      } else {
+        toast.error("Failed to apply. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setResumeFile(file);
   };
@@ -62,12 +72,7 @@ export default function ApplyJobModal({ job }: Props) {
     <>
       <Button onClick={() => setOpen(true)}>Apply Now</Button>
 
-      <Dialog
-        open={open}
-        onOpenChange={(value: boolean) => {
-          if (!loading) setOpen(value);
-        }}
-      >
+      <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Apply for {job.title}</DialogTitle>
@@ -76,7 +81,7 @@ export default function ApplyJobModal({ job }: Props) {
             </DialogDescription>
           </DialogHeader>
 
-          {/* Resume Upload */}
+          {/* Resume */}
           <div className="space-y-2 mt-4">
             <label className="text-sm font-medium">Resume *</label>
             <Input
@@ -97,9 +102,7 @@ export default function ApplyJobModal({ job }: Props) {
             <label className="text-sm font-medium">Cover Letter</label>
             <Textarea
               value={coverLetter}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setCoverLetter(e.target.value)
-              }
+              onChange={(e) => setCoverLetter(e.target.value)}
               placeholder="Write a short cover letter (optional)"
               rows={4}
               disabled={loading}

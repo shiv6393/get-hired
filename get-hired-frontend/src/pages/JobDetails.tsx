@@ -13,7 +13,7 @@ export default function JobDetails() {
   const { role } = useAuth();
 
   const [job, setJob] = useState<JobDetailsType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -22,8 +22,10 @@ export default function JobDetails() {
     const loadJob = async () => {
       try {
         setLoading(true);
-        const data = await jobsApi.getById(id);
-        setJob(data);
+
+        // ✅ Proper backend integration
+        const res = await jobsApi.getById(id);
+        setJob(res.data);
       } catch {
         setError("Unable to load job details");
       } finally {
@@ -52,22 +54,19 @@ export default function JobDetails() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 space-y-6">
+      {/* ================= JOB HEADER ================= */}
       <div className="space-y-2">
         <h1 className="text-2xl font-bold">{job.title}</h1>
         <p className="text-muted-foreground">{job.company}</p>
-        <Badge>{job.type}</Badge>
+        <Badge>Open Position</Badge>
       </div>
 
       <p className="text-sm text-muted-foreground">📍 {job.location}</p>
 
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Job Description</h2>
-        <p className="text-sm">{job.description}</p>
-      </div>
-
       {/* ================= APPLY SECTION ================= */}
 
-      {!role && (
+      {/* Not logged in */}
+      {role === null && (
         <Button
           className="w-full"
           onClick={() =>
@@ -76,15 +75,17 @@ export default function JobDetails() {
             })
           }
         >
-          You are not Loggedin
+          Login to Apply
         </Button>
       )}
 
-      {role === "USER" && <ApplyJobModal job={job} />}
+      {/* Candidate */}
+      {role === "CANDIDATE" && <ApplyJobModal job={job} />}
 
+      {/* Recruiter / Admin */}
       {(role === "RECRUITER" || role === "ADMIN") && (
         <p className="text-sm text-muted-foreground">
-          Recruiters cannot apply for jobs.
+          Recruiters and admins cannot apply for jobs.
         </p>
       )}
     </div>

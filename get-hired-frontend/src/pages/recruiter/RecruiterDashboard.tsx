@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { recruiterApi } from "@/services/recruiterApi";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 interface RecruiterJob {
   id: string;
@@ -12,11 +13,18 @@ interface RecruiterJob {
 }
 
 export default function RecruiterDashboard() {
+  const { role } = useAuth();
+
   const [jobs, setJobs] = useState<RecruiterJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  // 🔐 Role protection
+  if (role !== "RECRUITER") {
+    return <Navigate to="/" replace />;
+  }
 
   const fetchJobs = async (pageNumber = 0) => {
     try {
@@ -25,9 +33,10 @@ export default function RecruiterDashboard() {
 
       const res = await recruiterApi.getMyJobs(pageNumber, "createdAt", "desc");
 
-      setJobs(res.content);
-      setPage(res.number);
-      setTotalPages(res.totalPages);
+      // ✅ backend Page<JobResponseDto>
+      setJobs(res.data.content);
+      setPage(res.data.number);
+      setTotalPages(res.data.totalPages);
     } catch {
       setError("Failed to load recruiter jobs");
     } finally {

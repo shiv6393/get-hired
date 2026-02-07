@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+type Role = "CANDIDATE" | "RECRUITER" | "ADMIN";
+
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [role, setRole] = useState<"USER" | "RECRUITER" | "ADMIN">("USER");
+  const [role, setRole] = useState<Role>("CANDIDATE");
 
   const handleLogin = () => {
-    login(role);
+    // 🔐 TEMP token (replace with backend response later)
+    const fakeToken = "mock-jwt-token";
+
+    login(role, fakeToken);
     navigate("/");
   };
 
@@ -25,9 +30,9 @@ export default function Login() {
       <select
         className="w-full border rounded-md px-3 py-2 text-sm"
         value={role}
-        onChange={(e) => setRole(e.target.value as typeof role)}
+        onChange={(e) => setRole(e.target.value as Role)}
       >
-        <option value="USER">User</option>
+        <option value="CANDIDATE">User</option>
         <option value="RECRUITER">Recruiter</option>
         <option value="ADMIN">Admin</option>
       </select>

@@ -1,15 +1,22 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api/applications";
+// src/services/applicationsApi.ts
+import { api } from "@/lib/axios";
+import type { AppliedJob } from "@/types/appliedJob";
 
 export const applicationsApi = {
-  apply: async (payload: FormData): Promise<any> => {
-    const res = await axios.post(API_URL, payload, {
+  // 🔹 Apply for a job (multipart)
+  apply: (formData: FormData) =>
+    api.post("/applications", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    });
+    }),
 
-    return res.data;
-  },
+  // 🔹 Candidate: get applied jobs (backend source of truth)
+  getMyAppliedJobs: (page = 0, size = 10) =>
+    api.get<{
+      content: AppliedJob[];
+      totalPages: number;
+      totalElements: number;
+      number: number;
+    }>(`/candidates/applications?page=${page}&size=${size}`),
 };

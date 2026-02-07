@@ -12,6 +12,7 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import UserDashboard from "@/pages/user/UserDashboard";
 import RecruiterDashboard from "@/pages/recruiter/RecruiterDashboard";
 import ApplicantsPage from "@/pages/recruiter/ApplicantsPage";
+import EditJob from "@/pages/recruiter/EditJob";
 
 export default function AppRoutes() {
   return (
@@ -71,6 +72,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/recruiter/jobs/:jobId/edit" element={<EditJob />} />
     </Routes>
   );
 }

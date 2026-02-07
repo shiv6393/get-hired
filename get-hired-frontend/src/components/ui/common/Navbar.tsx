@@ -11,6 +11,13 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { role, logout } = useAuth();
 
+  const handleLogout = () => {
+    // 🔐 clear backend auth token
+    localStorage.removeItem("token");
+    // 🔐 clear frontend role
+    logout();
+  };
+
   return (
     <motion.nav
       initial={{ y: -20, opacity: 0 }}
@@ -24,7 +31,7 @@ export default function Navbar() {
       "
     >
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
+        {/* ================= LOGO ================= */}
         <Link
           to="/"
           className="text-xl font-semibold text-gray-900 dark:text-white"
@@ -38,48 +45,48 @@ export default function Navbar() {
             Jobs
           </Link>
 
-          {role && (
-            <Link to="/applied" className={navLink}>
-              Applied Jobs
-            </Link>
-          )}
-
-          {role === "USER" && (
-            <Link to="/user" className={navLink}>
-              Dashboard
-            </Link>
-          )}
-
-          {(role === "RECRUITER" || role === "ADMIN") && (
+          {/* ================= CANDIDATE ================= */}
+          {role === "CANDIDATE" && (
             <>
-              {/* Primary CTA */}
+              <Link to="/applied" className={navLink}>
+                Applied Jobs
+              </Link>
+              <Link to="/user" className={navLink}>
+                Dashboard
+              </Link>
+            </>
+          )}
+
+          {/* ================= RECRUITER ================= */}
+          {role === "RECRUITER" && (
+            <>
               <Link to="/recruiter/post-job">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   Post Job
                 </Button>
               </Link>
-
               <Link to="/recruiter/dashboard" className={navLink}>
-                Recruiter
+                Recruiter Dashboard
               </Link>
             </>
           )}
 
+          {/* ================= ADMIN ================= */}
           {role === "ADMIN" && (
             <Link to="/admin" className="text-sm font-medium text-red-600">
               Admin
             </Link>
           )}
 
-          {/* Theme Toggle */}
+          {/* ================= THEME TOGGLE ================= */}
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </Button>
 
-          {/* Auth Buttons */}
+          {/* ================= AUTH ================= */}
           {role ? (
-            <Button variant="outline" onClick={logout}>
-              Logout ({role})
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
             </Button>
           ) : (
             <>
@@ -117,19 +124,20 @@ export default function Navbar() {
               Jobs
             </Link>
 
-            {role && (
-              <Link to="/applied" onClick={() => setOpen(false)}>
-                Applied Jobs
-              </Link>
+            {/* ================= CANDIDATE ================= */}
+            {role === "CANDIDATE" && (
+              <>
+                <Link to="/applied" onClick={() => setOpen(false)}>
+                  Applied Jobs
+                </Link>
+                <Link to="/user" onClick={() => setOpen(false)}>
+                  Dashboard
+                </Link>
+              </>
             )}
 
-            {role === "USER" && (
-              <Link to="/user" onClick={() => setOpen(false)}>
-                Dashboard
-              </Link>
-            )}
-
-            {(role === "RECRUITER" || role === "ADMIN") && (
+            {/* ================= RECRUITER ================= */}
+            {role === "RECRUITER" && (
               <>
                 <Link
                   to="/recruiter/post-job"
@@ -138,13 +146,13 @@ export default function Navbar() {
                 >
                   Post Job
                 </Link>
-
                 <Link to="/recruiter/dashboard" onClick={() => setOpen(false)}>
                   Recruiter Dashboard
                 </Link>
               </>
             )}
 
+            {/* ================= ADMIN ================= */}
             {role === "ADMIN" && (
               <Link to="/admin" className="text-red-600">
                 Admin
@@ -156,8 +164,12 @@ export default function Navbar() {
             </Button>
 
             {role ? (
-              <Button variant="outline" onClick={logout} className="w-full">
-                Logout ({role})
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full"
+              >
+                Logout
               </Button>
             ) : (
               <>
@@ -178,6 +190,6 @@ export default function Navbar() {
   );
 }
 
-/* ✅ Tailwind helper */
+/* ================= TAILWIND HELPER ================= */
 const navLink =
   "text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors";

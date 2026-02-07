@@ -3,26 +3,26 @@ package get_hired.dto;
 import get_hired.entity.Job;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder
-@Setter
-public class JobResponseDto {
+public class JobDetailsResponseDto {
 
     private String id;
     private String title;
+    private String description;
     private String company;
     private String location;
     private long applicantsCount;
 
-    /**
-     * applicantsCount is injected from service layer
-     */
-    public static JobResponseDto fromEntity(Job job, long applicantsCount) {
-        return JobResponseDto.builder()
+    public static JobDetailsResponseDto fromEntity(
+            Job job,
+            long applicantsCount
+    ) {
+        return JobDetailsResponseDto.builder()
                 .id(job.getId())
                 .title(job.getTitle())
+                .description(job.getDescription())
                 .company(job.getRecruiter().getCompanyName())
                 .location(job.getLocation())
                 .applicantsCount(applicantsCount)
