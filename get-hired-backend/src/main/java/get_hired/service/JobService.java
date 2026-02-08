@@ -123,6 +123,17 @@ public class JobService {
 
         return JobResponseDto.fromEntity(updatedJob, applicantsCount);
     }
+    // GET PUBLIC JOBS (FOR JOB LISTING PAGE)
+    public Page<JobResponseDto> getPublicJobs(Pageable pageable) {
+
+        Page<Job> jobsPage = jobRepository.findAll(pageable);
+
+        return jobsPage.map(job -> {
+            long applicantsCount = applicationRepository.countByJob(job);
+            return JobResponseDto.fromEntity(job, applicantsCount);
+        });
+    }
+
 
 }
 

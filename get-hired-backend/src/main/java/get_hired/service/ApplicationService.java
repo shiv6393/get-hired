@@ -3,6 +3,7 @@ package get_hired.service;
 import get_hired.dto.ApplicantResponseDto;
 import get_hired.dto.AppliedJobResponseDto;
 import get_hired.entity.Application;
+import get_hired.entity.ApplicationStatus;
 import get_hired.entity.Job;
 import get_hired.entity.User;
 import get_hired.exception.BadRequestException;
@@ -62,7 +63,6 @@ public class ApplicationService {
 
         Application application = new Application();
         application.setJob(job);
-        application.setCandidate(candidate);
         application.setResumeUrl(resumeUrl);
         application.setCoverLetter(coverLetter);
         application.setAppliedAt(Instant.now());
@@ -100,5 +100,24 @@ public class ApplicationService {
         return applicationRepository
                 .findAllByCandidate(candidate, pageable)
                 .map(AppliedJobResponseDto::fromEntity);
+    }
+    public void updateApplicationStatus(
+            String applicationId,
+            String recruiterId,
+            ApplicationStatus status
+    ) {
+        Application app = applicationRepository.findById(applicationId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Application not found"));
+
+        Job job = app.getJob();
+
+        // 🔐 Ownership check
+        if (!job.getRecruiter().getId().equals(recruiterId)) {
+            throw new BadRequestException("Access denied");
+        }
+
+        app.setStatus(status);
+        applicationRepository.save(app);
     }
 }

@@ -53,4 +53,13 @@ export const recruiterApi = {
   deleteJob: async (jobId: string) => {
     return api.delete(`/jobs/${jobId}`);
   },
+  // 🔹 Update applicant status
+  updateApplicantStatus: async (
+    applicationId: string,
+    status: "SHORTLISTED" | "REJECTED",
+  ) => {
+    return api.patch(`/recruiters/applications/${applicationId}/status`, {
+      status,
+    });
+  },
 };

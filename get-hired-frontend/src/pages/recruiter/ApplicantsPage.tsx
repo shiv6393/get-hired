@@ -3,13 +3,16 @@ import { useParams, Navigate } from "react-router-dom";
 import { recruiterApi } from "@/services/recruiterApi";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+
+type ApplicationStatus =  "SHORTLISTED" | "REJECTED";
 
 interface Applicant {
   id: string;
-  applicantName: string;
   email: string;
   resumeUrl: string;
   appliedAt: string;
+  status: ApplicationStatus;
 }
 
 export default function ApplicantsPage() {
@@ -45,6 +48,26 @@ export default function ApplicantsPage() {
     fetchApplicants();
   }, [jobId]);
 
+  const updateStatus = async (
+    applicationId: string,
+    status: ApplicationStatus,
+  ) => {
+    try {
+      await recruiterApi.updateApplicantStatus(applicationId, status);
+
+      // ✅ Update UI immediately
+      setApplicants((prev) =>
+        prev.map((app) =>
+          app.id === applicationId ? { ...app, status } : app,
+        ),
+      );
+
+      toast.success(`Applicant ${status.toLowerCase()}`);
+    } catch {
+      toast.error("Failed to update application status");
+    }
+  };
+
   if (loading) {
     return (
       <p className="text-sm text-muted-foreground">Loading applicants...</p>
@@ -66,18 +89,46 @@ export default function ApplicantsPage() {
           {applicants.map((app) => (
             <div key={app.id} className="p-4 flex items-center justify-between">
               <div>
-                <p className="font-medium">{app.applicantName}</p>
-                <p className="text-sm text-muted-foreground">{app.email}</p>
+                <p className="font-medium">{app.email}</p>
+
                 <p className="text-xs text-muted-foreground">
                   Applied on {new Date(app.appliedAt).toLocaleDateString()}
                 </p>
+
+                <p className="text-xs mt-1">
+                  Status: <b>{app.status}</b>
+                </p>
               </div>
 
-              <a href={app.resumeUrl} target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  View Resume
+              <div className="flex gap-2 items-center">
+                <a
+                  href={app.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button size="sm" variant="outline">
+                    Resume
+                  </Button>
+                </a>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={app.status === "SHORTLISTED"}
+                  onClick={() => updateStatus(app.id, "SHORTLISTED")}
+                >
+                  Shortlist
                 </Button>
-              </a>
+
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={app.status === "REJECTED"}
+                  onClick={() => updateStatus(app.id, "REJECTED")}
+                >
+                  Reject
+                </Button>
+              </div>
             </div>
           ))}
         </div>

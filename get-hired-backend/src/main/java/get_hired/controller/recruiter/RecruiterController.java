@@ -1,5 +1,6 @@
 package get_hired.controller.recruiter;
 import get_hired.dto.ApplicantResponseDto;
+import get_hired.dto.ApplicationStatusRequestDto;
 import get_hired.dto.JobApplicationCountDto;
 import get_hired.dto.RecruiterDashboardStatsDto;
 import get_hired.entity.Recruiter;
@@ -7,6 +8,7 @@ import get_hired.entity.User;
 import get_hired.service.ApplicationService;
 import get_hired.service.RecruiterAnalyticsService;
 import get_hired.service.RecruiterService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -81,5 +83,23 @@ public class RecruiterController {
                 recruiterAnalyticsService.getApplicationsPerJob(recruiterId)
         );
     }
+    @PatchMapping("/applications/{applicationId}/status")
+    @PreAuthorize("hasRole('RECRUITER')")
+    public ResponseEntity<Void> updateApplicationStatus(
+            @PathVariable String applicationId,
+            @Valid @RequestBody ApplicationStatusRequestDto dto,
+            Authentication authentication
+    ) {
+        String recruiterId = authentication.getName();
+
+        applicationService.updateApplicationStatus(
+                applicationId,
+                recruiterId,
+                dto.getStatus()
+        );
+
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
