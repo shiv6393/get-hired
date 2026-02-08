@@ -3,42 +3,59 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
-type Role = "CANDIDATE" | "RECRUITER" | "ADMIN";
+import { authApi } from "@/services/authApi";
+import { toast } from "sonner";
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [role, setRole] = useState<Role>("CANDIDATE");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // 🔐 TEMP token (replace with backend response later)
-    const fakeToken = "mock-jwt-token";
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
 
-    login(role, fakeToken);
-    navigate("/");
+    try {
+      setLoading(true);
+
+      const res = await authApi.login(email, password);
+
+      // 🔐 Backend is source of truth
+      login(res.data.role, res.data.token);
+
+      toast.success("Logged in successfully");
+      navigate("/");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="max-w-sm mx-auto px-4 py-10 space-y-6">
       <h1 className="text-xl font-semibold text-center">Login</h1>
 
-      <Input placeholder="Email" />
-      <Input placeholder="Password" type="password" />
+      <Input
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <select
-        className="w-full border rounded-md px-3 py-2 text-sm"
-        value={role}
-        onChange={(e) => setRole(e.target.value as Role)}
-      >
-        <option value="CANDIDATE">User</option>
-        <option value="RECRUITER">Recruiter</option>
-        <option value="ADMIN">Admin</option>
-      </select>
+      <Input
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-      <Button onClick={handleLogin} className="w-full">
-        Login
+      <Button onClick={handleLogin} className="w-full" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
       </Button>
     </div>
   );
