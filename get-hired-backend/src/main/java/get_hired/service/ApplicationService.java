@@ -98,7 +98,7 @@ public class ApplicationService {
                         new ResourceNotFoundException("Candidate not found"));
 
         return applicationRepository
-                .findAllByCandidate(candidate, pageable)
+                .findAllByCandidateEmail(candidate.getEmail(), pageable)
                 .map(AppliedJobResponseDto::fromEntity);
     }
     public void updateApplicationStatus(

@@ -47,5 +47,9 @@ public interface ApplicationRepository extends JpaRepository<Application, String
     // ----------------------------------------
     List<Application> findAllByJob(Job job);
 
-    Page<Application> findAllByCandidate(User candidate, Pageable pageable);
+    Page<Application> findAllByCandidateEmail(
+            String candidateEmail,
+            Pageable pageable
+    );
+
 }
