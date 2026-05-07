@@ -1,5 +1,6 @@
 package get_hired.controller.recruiter;
 import get_hired.dto.ApplicantResponseDto;
+import get_hired.dto.RecruiterApplicationSummaryDto;
 import get_hired.dto.ApplicationStatusRequestDto;
 import get_hired.dto.JobApplicationCountDto;
 import get_hired.dto.RecruiterDashboardStatsDto;
@@ -62,6 +63,16 @@ public class RecruiterController {
                 applicationService.getApplicantsForJob(jobId, recruiterId)
         );
     }
+
+    @PreAuthorize("hasRole('RECRUITER')")
+    @GetMapping("/applications")
+    public ResponseEntity<List<RecruiterApplicationSummaryDto>> getRecruiterApplications(
+            Authentication authentication
+    ) {
+        String recruiterId = authentication.getName();
+        return ResponseEntity.ok(applicationService.getApplicationsForRecruiter(recruiterId));
+    }
+
     @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/dashboard/stats")
     public ResponseEntity<RecruiterDashboardStatsDto> getDashboardStats(

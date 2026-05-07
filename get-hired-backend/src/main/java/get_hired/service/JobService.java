@@ -54,7 +54,7 @@ public class JobService {
         return JobResponseDto.fromEntity(savedJob, 0);
     }
     // GET JOBS BY RECRUITER (DASHBOARD)
-    public Page<Job> getJobsByRecruiter(
+    public Page<JobResponseDto> getJobsByRecruiter(
             String recruiterId,
             Pageable pageable
     ) {
@@ -62,7 +62,11 @@ public class JobService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Recruiter profile not found"));
 
-        return jobRepository.findAllByRecruiter(recruiter, pageable);
+        return jobRepository.findAllByRecruiter(recruiter, pageable)
+                .map(job -> {
+                    long applicantsCount = applicationRepository.countByJob(job);
+                    return JobResponseDto.fromEntity(job, applicantsCount);
+                });
     }
 
     // DELETE JOB (OWNERSHIP CHECK)

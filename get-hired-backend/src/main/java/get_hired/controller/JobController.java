@@ -4,7 +4,6 @@ import get_hired.dto.CreateJobRequest;
 import get_hired.dto.JobDetailsResponseDto;
 import get_hired.dto.JobRequestDto;
 import get_hired.dto.JobResponseDto;
-import get_hired.entity.Job;
 import get_hired.service.JobService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -51,15 +50,21 @@ public class JobController {
     // GET JOBS BY RECRUITER (Dashboard)
     @PreAuthorize("hasRole('RECRUITER')")
     @GetMapping("/my")
-    public ResponseEntity<Page<Job>> getMyJobs(
+    public ResponseEntity<Page<JobResponseDto>> getMyJobs(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String dir
     ) {
+        Sort sort = dir.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
         String recruiterId = authentication.getName();
-        Page<Job> jobs = jobService.getJobsByRecruiter(
+        Page<JobResponseDto> jobs = jobService.getJobsByRecruiter(
                 recruiterId,
-                PageRequest.of(page, size)
+                PageRequest.of(page, size, sort)
         );
 
         return ResponseEntity.ok(jobs);

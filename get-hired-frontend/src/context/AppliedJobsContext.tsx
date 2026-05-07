@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 import type { AppliedJob } from "@/types/appliedJob";
 import { applicationsApi } from "@/services/applicationsApi";
 
@@ -18,7 +18,7 @@ export function AppliedJobsProvider({
   const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchAppliedJobs = async () => {
+  const fetchAppliedJobs = useCallback(async () => {
     try {
       setLoading(true);
       const res = await applicationsApi.getMyAppliedJobs();
@@ -26,10 +26,6 @@ export function AppliedJobsProvider({
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchAppliedJobs();
   }, []);
 
   return (

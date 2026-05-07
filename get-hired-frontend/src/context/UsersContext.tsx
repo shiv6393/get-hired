@@ -21,7 +21,7 @@ export function UsersProvider({ children }: { children: React.ReactNode }) {
       id: "2",
       name: "Rahul Sharma",
       email: "rahul@gmail.com",
-      role: "USER",
+      role: "CANDIDATE",
     },
     {
       id: "3",

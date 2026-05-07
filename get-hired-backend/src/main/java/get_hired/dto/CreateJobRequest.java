@@ -20,8 +20,7 @@ public class CreateJobRequest {
     @NotBlank(message = "Location is required")
     private String location;
 
-    @NotNull(message = "Salary is required")
-    @Positive(message = "Salary must be positive")
+    @PositiveOrZero(message = "Salary must be zero or positive")
     private Double salary;
 
     // getters & setters

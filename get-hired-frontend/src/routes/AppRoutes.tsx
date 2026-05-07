@@ -10,6 +10,8 @@ import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import UserDashboard from "@/pages/user/UserDashboard";
+import UserProfile from "@/pages/user/UserProfile";
+import UserSettings from "@/pages/user/UserSettings";
 import RecruiterDashboard from "@/pages/recruiter/RecruiterDashboard";
 import ApplicantsPage from "@/pages/recruiter/ApplicantsPage";
 import EditJob from "@/pages/recruiter/EditJob";
@@ -22,7 +24,14 @@ export default function AppRoutes() {
       <Route path="/jobs/:id" element={<JobDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/applied" element={<AppliedJobs />} />
+      <Route
+        path="/applied"
+        element={
+          <ProtectedRoute allowedRoles={["CANDIDATE"]}>
+            <AppliedJobs />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/recruiter/post-job"
         element={
@@ -31,7 +40,6 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
       <Route
         path="/admin"
         element={
@@ -51,8 +59,24 @@ export default function AppRoutes() {
       <Route
         path="/user"
         element={
-          <ProtectedRoute allowedRoles={["USER"]}>
+          <ProtectedRoute allowedRoles={["CANDIDATE"]}>
             <UserDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user/profile"
+        element={
+          <ProtectedRoute allowedRoles={["CANDIDATE"]}>
+            <UserProfile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/user/settings"
+        element={
+          <ProtectedRoute allowedRoles={["CANDIDATE"]}>
+            <UserSettings />
           </ProtectedRoute>
         }
       />

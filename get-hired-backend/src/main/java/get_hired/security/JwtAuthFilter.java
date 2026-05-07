@@ -1,5 +1,6 @@
 package get_hired.security;
 
+import get_hired.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +16,11 @@ import java.util.List;
 public class JwtAuthFilter extends GenericFilter {
 
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    public JwtAuthFilter(JwtUtil jwtUtil) {
+    public JwtAuthFilter(JwtUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -34,12 +37,13 @@ public class JwtAuthFilter extends GenericFilter {
             String token = authHeader.substring(7);
 
             Claims claims = jwtUtil.extractClaims(token);
-            String email = claims.getSubject();
+            String subject = claims.getSubject();
             String role = claims.get("role", String.class);
+            String principal = resolvePrincipal(subject);
 
             UsernamePasswordAuthenticationToken auth =
                     new UsernamePasswordAuthenticationToken(
-                            email,
+                            principal,
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
@@ -48,5 +52,20 @@ public class JwtAuthFilter extends GenericFilter {
         }
 
         chain.doFilter(request, response);
+    }
+
+    private String resolvePrincipal(String subject) {
+        if (subject == null || subject.isBlank()) {
+            return subject;
+        }
+
+        // Backward compatibility for older tokens whose subject was the email.
+        if (subject.contains("@")) {
+            return userRepository.findByEmail(subject)
+                    .map(user -> user.getId())
+                    .orElse(subject);
+        }
+
+        return subject;
     }
 }

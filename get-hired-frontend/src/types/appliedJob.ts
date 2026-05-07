@@ -3,5 +3,6 @@ export interface AppliedJob {
   jobId: string;
   jobTitle: string;
   company: string;
+  status: "APPLIED" | "SHORTLISTED" | "REJECTED";
   appliedAt: string;
 }

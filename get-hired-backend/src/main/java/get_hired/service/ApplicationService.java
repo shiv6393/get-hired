@@ -2,6 +2,7 @@ package get_hired.service;
 
 import get_hired.dto.ApplicantResponseDto;
 import get_hired.dto.AppliedJobResponseDto;
+import get_hired.dto.RecruiterApplicationSummaryDto;
 import get_hired.entity.Application;
 import get_hired.entity.ApplicationStatus;
 import get_hired.entity.Job;
@@ -55,7 +56,7 @@ public class ApplicationService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Candidate not found"));
 
-        if (applicationRepository.existsByJobAndCandidate(job, candidate)) {
+        if (applicationRepository.existsByJobAndCandidateEmail(job, candidate.getEmail())) {
             throw new ConflictException("Already applied for this job");
         }
 
@@ -63,6 +64,7 @@ public class ApplicationService {
 
         Application application = new Application();
         application.setJob(job);
+        application.setCandidateEmail(candidate.getEmail());
         application.setResumeUrl(resumeUrl);
         application.setCoverLetter(coverLetter);
         application.setAppliedAt(Instant.now());
@@ -85,7 +87,10 @@ public class ApplicationService {
 
         return applicationRepository.findAllByJob(job)
                 .stream()
-                .map(ApplicantResponseDto::fromEntity)
+                .map(app -> ApplicantResponseDto.fromEntity(
+                        app,
+                        fileStorageService.toDownloadUrl(app.getResumeUrl())
+                ))
                 .toList();
     }
 
@@ -101,6 +106,17 @@ public class ApplicationService {
                 .findAllByCandidateEmail(candidate.getEmail(), pageable)
                 .map(AppliedJobResponseDto::fromEntity);
     }
+
+    public List<RecruiterApplicationSummaryDto> getApplicationsForRecruiter(String recruiterId) {
+        return applicationRepository.findAllByJobRecruiterIdOrderByAppliedAtDesc(recruiterId)
+                .stream()
+                .map(application -> RecruiterApplicationSummaryDto.fromEntity(
+                        application,
+                        fileStorageService.toDownloadUrl(application.getResumeUrl())
+                ))
+                .toList();
+    }
+
     public void updateApplicationStatus(
             String applicationId,
             String recruiterId,

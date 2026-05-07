@@ -11,16 +11,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ApplicationRepository extends JpaRepository<Application, String> {
 
     // ----------------------------------------
     // Duplicate application prevention
     // ----------------------------------------
-    boolean existsByJobAndCandidate(Job job, User candidate);
-
-    Optional<Application> findByJobAndCandidate(Job job, User candidate);
+    boolean existsByJobAndCandidateEmail(Job job, String candidateEmail);
 
     // ----------------------------------------
     // Aggregations
@@ -46,6 +43,8 @@ public interface ApplicationRepository extends JpaRepository<Application, String
     // Fetching
     // ----------------------------------------
     List<Application> findAllByJob(Job job);
+
+    List<Application> findAllByJobRecruiterIdOrderByAppliedAtDesc(String recruiterId);
 
     Page<Application> findAllByCandidateEmail(
             String candidateEmail,

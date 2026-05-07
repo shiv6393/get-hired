@@ -25,25 +25,45 @@ export default function PostJob() {
   });
 
   const handleSubmit = async () => {
-    if (!form.title || !form.description || !form.location) {
+    const title = form.title.trim();
+    const description = form.description.trim();
+    const location = form.location.trim();
+
+    if (!title || !description || !location) {
       toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (title.length < 3) {
+      toast.error("Job title must be at least 3 characters");
+      return;
+    }
+
+    if (description.length < 10) {
+      toast.error("Job description must be at least 10 characters");
       return;
     }
 
     try {
       setLoading(true);
+      const salary = form.salary.trim() === "" ? undefined : Number(form.salary);
+
+      if (salary !== undefined && Number.isNaN(salary)) {
+        toast.error("Salary must be a valid number");
+        return;
+      }
 
       await recruiterApi.createJob({
-        title: form.title,
-        description: form.description,
-        location: form.location,
-        salary: Number(form.salary),
+        title,
+        description,
+        location,
+        salary,
       });
 
       toast.success("Job posted successfully");
       navigate("/recruiter/dashboard");
-    } catch {
-      toast.error("Failed to post job");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to post job");
     } finally {
       setLoading(false);
     }

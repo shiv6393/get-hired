@@ -1,6 +1,7 @@
 package get_hired.dto;
 
 import get_hired.entity.Application;
+import get_hired.entity.ApplicationStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +15,7 @@ public class AppliedJobResponseDto {
     private String jobId;
     private String jobTitle;
     private String company;
+    private ApplicationStatus status;
     private Instant appliedAt;
 
     public static AppliedJobResponseDto fromEntity(Application app) {
@@ -22,6 +24,7 @@ public class AppliedJobResponseDto {
                 .jobId(app.getJob().getId())
                 .jobTitle(app.getJob().getTitle())
                 .company(app.getJob().getRecruiter().getCompanyName())
+                .status(app.getStatus())
                 .appliedAt(app.getAppliedAt())
                 .build();
     }
